@@ -1,6 +1,7 @@
 class Matrix:
-    def __init__(self, name: str):
-        self.matrix = None
+    def __init__(self, name: str, mat=None, mat_param=None):
+        self.matrix = mat
+        self.matrix_param = mat_param
         self.name = name
 
     def array_enter(self):
@@ -33,6 +34,7 @@ class Matrix:
                 print('wrong string')
         print()
         self.matrix = matrix
+        self.matrix_param = [n_size, m_size]
 
     def print_m(self):
         len_n = len(self.matrix)
@@ -59,26 +61,20 @@ class Matrix:
         except ValueError:
             return False
 
+    def det_a(self):
+        minors = []
+        for i, value in enumerate(self.matrix[0]):
+            matrix_temp = []
+            minor_value = value * (-1)^(i+1) * 0 # доделай это всё до нормального вида
+            # сделай поиск максимального количества нолей
+            # сделай разложение по строке с максимальным количеством нолей
+            # сделай простые преобразования матрицы
+
 
 def main():
     mat = Matrix('test')
     mat.array_enter()
     mat.print_m()
-    # while True:
-    #     size = input('Enter array size (nxm): ')
-    #     if size == '0': exit()
-    #     size_temp = size.split('x')
-    #     if len(size_temp) == 1:
-    #         size_temp.append(size_temp[0])
-    #     for num in size_temp:
-    #         if not num.isdigit():
-    #             print('Wrong size\n')
-    #             size_temp = True
-    #             break
-    #     if size_temp == True:
-    #         continue
-    #     mat = Matrix(array_enter(int(size_temp[0]), int(size_temp[1])))
-    #     mat.print_m()
 
 
 main()
