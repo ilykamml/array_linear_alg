@@ -6,6 +6,7 @@ class Matrix:
             self.matrix_param = self.check_matrix_param()
             self.matrix_transposed, self.matrix_param_t = self.matrix_trans()
             self.zeros = self.count_of_zeros()
+            self.determinant = self.det_a()
         else:
             self.array_enter()
 
@@ -68,7 +69,7 @@ class Matrix:
             case _:
                 matrix, matrix_param = [1], [1, 1]
         if sum(matrix_param) == 2:
-            print(f'|{matrix[0]}|')
+            print(f'|{matrix[0][0]}|')
         else:
             len_n, len_m = matrix_param
             max_d = len(str(max([max(a) for a in matrix])))
@@ -115,36 +116,33 @@ class Matrix:
                 if num != 0:
                     det_part = num * (-1) ** (i + coords[1]) * self.det_a(self.get_minor(coords[1] + 1, i + 1, matrix))
                     det.append(det_part)
-                    det.append(0)
         else:
             temp = Matrix('temp', matrix)
-            for attitude, att in enumerate(temp.zeros):
-                for string, num_of_zeros in enumerate(att):
-                    if max_zeros < num_of_zeros:
-                        max_zeros = num_of_zeros
-                        coords = [attitude, string]
-            match coords[0]:
-                case 0:
-                    matrix = temp.matrix.copy()
-                case 1:
-                    matrix = temp.matrix_transposed.copy()
-            if sum(temp.matrix_param) == 2:
-                return temp.matrix[0][0]
-            for i, num in enumerate(matrix[coords[1]]):
-                if num != 0:
-                    det_part = num * (-1) ** (i + coords[1]) * temp.det_a(temp.get_minor(coords[1] + 1, i + 1, matrix))
-                    det.append(det_part)
-                    det.append(0)
+            # for attitude, att in enumerate(temp.zeros):
+            #     for string, num_of_zeros in enumerate(att):
+            #         if max_zeros < num_of_zeros:
+            #             max_zeros = num_of_zeros
+            #             coords = [attitude, string]
+            # match coords[0]:
+            #     case 0:
+            #         matrix = temp.matrix.copy()
+            #     case 1:
+            #         matrix = temp.matrix_transposed.copy()
+            # if sum(temp.matrix_param) == 2:
+            #     return temp.matrix[0][0]
+            # for i, num in enumerate(matrix[coords[1]]):
+            #     if num != 0:
+            #         det_part = num * (-1) ** (i + coords[1]) * temp.det_a(temp.get_minor(coords[1] + 1, i + 1, matrix))
+            #         det.append(det_part)
+            return temp.determinant
         if not det:
             det.append(0)
 
         return sum(det)
 
-
-
-        # доделай это всё до нормального вида
-        # сделай поиск максимального количества нолей
-        # сделай разложение по строке с максимальным количеством нолей
+        # доделай это всё до нормального вида - сделано
+        # сделай поиск максимального количества нолей - сделано
+        # сделай разложение по строке с максимальным количеством нолей - сделано
         # сделай простые преобразования матрицы
 
     def get_minor(self, n_minor, m_minor, matrix=None):
@@ -152,9 +150,9 @@ class Matrix:
         minor = []
         n_string = []
         for n in range(self.matrix_param[0]):
-            if n+1 != n_minor:
+            if n + 1 != n_minor:
                 for m in range(self.matrix_param[1]):
-                    if m+1 != m_minor:
+                    if m + 1 != m_minor:
                         n_string.append(matrix[n][m])
             if n_string:
                 minor.append(n_string)
@@ -172,18 +170,28 @@ class Matrix:
 
 def main():
     # mat = Matrix('test')
-    # mat.array_enter()
-    # mat.print_m()
-    # mat.print_m('1')
-    # mat.print_m('123')
-    # print(mat.zeros)
-    mat = Matrix('lol', [[0, 3, 4], [1, 6, 5], [0, 0, 7]])
+    matttt = Matrix('big_lol', [
+        [53, 42, 76, 23, 76],
+        [79, 93, 34, 91, 64],
+        [27, 23, 73, 29, 23],
+        [23, 74, 23, 93, 65],
+        [15, 62, 87, 55, 40]])
+    mat = Matrix('lol', [
+        [0, 3, 4],
+        [1, 0, 5],
+        [1, 0, 7]])
+    matt = Matrix('lol2', [
+        [1, 5],
+        [7, 3]])
+    mattt = Matrix('lol3', [[10]])
+    matttt.print_m()
+    print(f'det = {matttt.determinant}\n')
     mat.print_m()
-    # mat.print_m(1)
-    # print(mat.get_minor(2, 3))
-    # print(mat.zeros)
-    print(f'det = {mat.det_a()}')
-
+    print(f'det = {mat.determinant}\n')
+    matt.print_m()
+    print(f'det = {matt.determinant}\n')
+    mattt.print_m()
+    print(f'det = {mattt.determinant}\n')
 
 
 main()
