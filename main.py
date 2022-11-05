@@ -43,6 +43,7 @@ class Matrix:
         self.matrix_param = [n_size, m_size]
         self.matrix_transposed, self.matrix_param_t = self.matrix_trans()
         self.zeros = self.count_of_zeros()
+        self.determinant = self.det_a()
 
     def check_matrix_param(self):
         return [len(self.matrix), len(self.matrix[0])]
@@ -193,6 +194,10 @@ def main():
     matt.print_m()
     print(f'det = {matt.determinant}\n')
     mattt.print_m()
+    print(f'det = {mattt.determinant}\n')
+
+    manual_enter = Matrix('Manual')
+    manual_enter.print_m()
     print(f'det = {mattt.determinant}\n')
 
 
