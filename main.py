@@ -49,9 +49,9 @@ class Matrix:
     def matrix_trans(self):
         matrix_t = []
         temp = []
-        for n in range(self.matrix_param[0]):
-            for m in range(self.matrix_param[1]):
-                temp.append(self.matrix[m][n])
+        for m in range(self.matrix_param[1]):
+            for n in range(self.matrix_param[0]):
+                temp.append(self.matrix[n][m])
             matrix_t.append(temp)
             temp = []
         matrix_param = [len(matrix_t), len(matrix_t[0])]
@@ -93,18 +93,73 @@ class Matrix:
             zeros[1].append(i.count(0))
         return zeros
 
-    def det_a(self):
-        minors = []
-        max_zeros = 0
-        for i in self.matrix:
-            max_zeros = max(max_zeros, self.matrix.count(0))
-        for i, value in enumerate(self.matrix[0]):
-            matrix_temp = []
-            minor_value = value * (-1)^(i+1) * 0 # доделай это всё до нормального вида
-            # сделай поиск максимального количества нолей
-            # сделай разложение по строке с максимальным количеством нолей
-            # сделай простые преобразования матрицы
+    def det_a(self, matrix=None):
+        det = []
+        coords = [0, 1]
+        max_zeros = -1
+        if matrix is None:
+            matrix = self.matrix.copy()
+            for attitude, att in enumerate(self.zeros):
+                for string, num_of_zeros in enumerate(att):
+                    if max_zeros < num_of_zeros:
+                        max_zeros = num_of_zeros
+                        coords = [attitude, string]
+            match coords[0]:
+                case 0:
+                    matrix = self.matrix.copy()
+                case 1:
+                    matrix = self.matrix_transposed.copy()
+            if sum(self.matrix_param) == 2:
+                return self.matrix[0][0]
+            for i, num in enumerate(matrix[coords[1]]):
+                if num != 0:
+                    det_part = num * (-1) ** (i + coords[1]) * self.det_a(self.get_minor(coords[1] + 1, i + 1, matrix))
+                    det.append(det_part)
+                    det.append(0)
+        else:
+            temp = Matrix('temp', matrix)
+            for attitude, att in enumerate(temp.zeros):
+                for string, num_of_zeros in enumerate(att):
+                    if max_zeros < num_of_zeros:
+                        max_zeros = num_of_zeros
+                        coords = [attitude, string]
+            match coords[0]:
+                case 0:
+                    matrix = temp.matrix.copy()
+                case 1:
+                    matrix = temp.matrix_transposed.copy()
+            if sum(temp.matrix_param) == 2:
+                return temp.matrix[0][0]
+            for i, num in enumerate(matrix[coords[1]]):
+                if num != 0:
+                    det_part = num * (-1) ** (i + coords[1]) * temp.det_a(temp.get_minor(coords[1] + 1, i + 1, matrix))
+                    det.append(det_part)
+                    det.append(0)
+        if not det:
+            det.append(0)
 
+        return sum(det)
+
+
+
+        # доделай это всё до нормального вида
+        # сделай поиск максимального количества нолей
+        # сделай разложение по строке с максимальным количеством нолей
+        # сделай простые преобразования матрицы
+
+    def get_minor(self, n_minor, m_minor, matrix=None):
+        if matrix is None: matrix = self.matrix.copy()
+        minor = []
+        n_string = []
+        for n in range(self.matrix_param[0]):
+            if n+1 != n_minor:
+                for m in range(self.matrix_param[1]):
+                    if m+1 != m_minor:
+                        n_string.append(matrix[n][m])
+            if n_string:
+                minor.append(n_string)
+            n_string = []
+        return minor
 
     @staticmethod
     def isanum(num: str):
@@ -122,9 +177,13 @@ def main():
     # mat.print_m('1')
     # mat.print_m('123')
     # print(mat.zeros)
-    mat = Matrix('lol', [[2, 3], [1, 6]])
+    mat = Matrix('lol', [[0, 3, 4], [1, 6, 5], [0, 0, 7]])
     mat.print_m()
-    mat.print_m(1)
+    # mat.print_m(1)
+    # print(mat.get_minor(2, 3))
+    # print(mat.zeros)
+    print(f'det = {mat.det_a()}')
+
 
 
 main()
