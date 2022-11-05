@@ -95,6 +95,8 @@ class Matrix:
         return zeros
 
     def det_a(self, matrix=None):
+        if self.matrix_param[0] != self.matrix_param[1]:
+            return 0
         det = []
         coords = [0, 1]
         max_zeros = -1
