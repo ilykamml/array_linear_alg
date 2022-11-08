@@ -2,13 +2,15 @@ class Matrix:
     def __init__(self, name: str, mat=None):
         self.name = name
         if mat is not None:
-            self.matrix = mat                                                   # матрица
-            self.matrix_param = self.check_matrix_param()                       # параметры матрицы
-            self.matrix_transposed, self.matrix_param_t = self.matrix_trans()   # транспонированная матрица и парам
-            self.zeros = self.count_of_zeros()                                  # количество нулей в строках и столб
-            self.determinant = self.det_a()                                     # детерминант матрицы
+            self.matrix = mat  # матрица
+            self.matrix_param = self.check_matrix_param()  # параметры матрицы
+            self.matrix_transposed, self.matrix_param_t = self.matrix_trans()  # транспонированная матрица и парам
+            self.zeros = self.count_of_zeros()  # количество нулей в строках и столб
+            self.matrix_simplified = self.simplifying_the_matrix(simpl_direct='n')  # упрощ матрица
+            self.zeros_simp = self.count_of_zeros(self.matrix_simplified)
+            self.determinant = self.det_a()  # детерминант матрицы
         else:
-            self.array_enter()                                                  # ввод матрицы
+            self.array_enter()  # ввод матрицы
 
     def array_enter(self):
         while True:  # цикл для ввода параметров матрицы
@@ -47,14 +49,14 @@ class Matrix:
 
     def check_matrix_param(self, matrix=None):
         if matrix is not None:
-            return [len(matrix), len(matrix[0])]        # параметры заданной матрицы
+            return [len(matrix), len(matrix[0])]  # параметры заданной матрицы
         return [len(self.matrix), len(self.matrix[0])]  # параметры матрицы
 
     def matrix_trans(self, matrix=None):
-        if matrix is None:              # проверка на отсутствие матрицы
+        if matrix is None:  # проверка на отсутствие матрицы
             matrix = self.matrix.copy()
             param = self.matrix_param
-        else:                           # задание матрицы, если она есть в аргументах
+        else:  # задание матрицы, если она есть в аргументах
             matrix = matrix.copy()
             param = self.check_matrix_param(matrix)
         matrix_t = []
@@ -69,24 +71,24 @@ class Matrix:
 
     def print_m(self, arg=0, matrix=None):
         match arg:
-            case 0:                                             # обычная печать матрицы
+            case 0:  # обычная печать матрицы
                 matrix = self.matrix.copy()
                 matrix_param = self.matrix_param.copy()
-            case 1:                                             # обычная печать транспонированной матрицы
+            case 1:  # обычная печать транспонированной матрицы
                 matrix = self.matrix_transposed.copy()
                 matrix_param = self.matrix_param_t.copy()
-            case 2:                                             # заданная печать печать матрицы
+            case 2:  # заданная печать печать матрицы
                 matrix_param = self.check_matrix_param(matrix)
-            case _:                                             # печать матрицы, если аргумент странный
+            case _:  # печать матрицы, если аргумент странный
                 matrix, matrix_param = [1], [1, 1]
-        if sum(matrix_param) == 2:                              # если матрица еденичная -> печать значения
+        if sum(matrix_param) == 2:  # если матрица еденичная -> печать значения
             print(f'|{matrix[0][0]}|')
         else:
             len_n, len_m = matrix_param
             max_d = len(str(max([max(a) for a in matrix])))
             min_d = len(str(min([min(a) for a in matrix])))
-            max_len = max(max_d, min_d)     # поиск максимальной длинны числа для регулировки печати
-            for n in range(len_n):          # печать матрицы
+            max_len = max(max_d, min_d)  # поиск максимальной длинны числа для регулировки печати
+            for n in range(len_n):  # печать матрицы
                 for m in range(len_m):
                     len_now = len(str(matrix[n][m]))
                     if m == 0:
@@ -97,11 +99,16 @@ class Matrix:
                         print(f'{matrix[n][m]}', end=' ' * (max_len - len_now + 1))
         print()
 
-    def count_of_zeros(self):
+    def count_of_zeros(self, matrix=None):
+        if matrix is None:
+            matrix = self.matrix
+            matrix_transposed = self.matrix_transposed
+        else:
+            matrix_transposed, param = self.matrix_trans(matrix)
         zeros = [[], []]
-        for i in self.matrix:
+        for i in matrix:
             zeros[0].append(i.count(0))  # количество нулей по n строкам
-        for i in self.matrix_transposed:
+        for i in matrix_transposed:
             zeros[1].append(i.count(0))  # количество нулей по m строкам
         return zeros
 
@@ -112,24 +119,26 @@ class Matrix:
         coords = [0, 1]
         max_zeros = -1
         if matrix is None:  # ищем детерминант для матрицы из класса
-            matrix = self.matrix.copy()
-            for attitude, att in enumerate(self.zeros):
+            matrix = self.matrix_simplified.copy()
+            for attitude, att in enumerate(self.zeros_simp):
                 for string, num_of_zeros in enumerate(att):
                     if max_zeros < num_of_zeros:
                         max_zeros = num_of_zeros
                         coords = [attitude, string]  # координаты для разложения матрицы по n/m с большим кол-вом нулей
             match coords[0]:
                 case 0:
-                    matrix = self.matrix.copy()             # 0 для разложения по n
+                    matrix = self.matrix_simplified.copy()  # 0 для разложения по n
                 case 1:
-                    matrix = self.matrix_transposed.copy()  # 1 для разложения по m
+                    matrix, param = self.matrix_trans(self.matrix_simplified)  # 1 для разложения по m
             if sum(self.matrix_param) == 2:
-                return self.matrix[0][0]                    # детерминант матрицы 1х1
-            for i, num in enumerate(matrix[coords[1]]):     # поиск детерминанта по формуле
+                return self.matrix[0][0]  # детерминант матрицы 1х1
+            if self.matrix_param[0] == 2 and self.matrix_param[1] == 2:
+                return matrix[0][0] * matrix[1][1] - matrix[0][1] * matrix[1][0]
+            for i, num in enumerate(matrix[coords[1]]):  # поиск детерминанта по формуле
                 if num != 0:
                     det_part = num * (-1) ** (i + coords[1]) * self.det_a(self.get_minor(coords[1] + 1, i + 1, matrix))
                     det.append(det_part)
-        else:               # ищем детерминант для заданной матрицы
+        else:  # ищем детерминант для заданной матрицы
             temp = Matrix('temp', matrix)
             # for attitude, att in enumerate(temp.zeros):  <- пример плохого решения
             #     for string, num_of_zeros in enumerate(att):
@@ -162,47 +171,77 @@ class Matrix:
         if matrix is None:  # простые преобразования для матрицы из класса
             if transposed:  # преобразование по m
                 matrix = self.matrix_transposed.copy()
-            else:           # преобразование по n
+            else:  # преобразование по n
                 matrix = self.matrix.copy()
-        else:               # простые преобразования для заданной матрицы
+        else:  # простые преобразования для заданной матрицы
             if transposed:  # преобразование по m
                 matrix, param = self.matrix_trans(matrix)
-            else:           # преобразование по n
+            else:  # преобразование по n
                 matrix = matrix.copy()
-        n_source_list = matrix[n_source-1]      # строчка для сложения
-        n_to_conv_list = matrix[n_to_conv-1]    # строчка для преобразования
-        for i in range(len(n_source_list)):     # преобразование каждого элемента строчки для преобразования
+        n_source_list = matrix[n_source - 1]  # строчка для сложения
+        n_to_conv_list = matrix[n_to_conv - 1]  # строчка для преобразования
+        for i in range(len(n_source_list)):  # преобразование каждого элемента строчки для преобразования
             n_to_conv_list[i] = n_to_conv_list[i] + n_source_list[i] * digit
-        matrix[n_to_conv-1] = n_to_conv_list    # перезапись строчки в матрце
-        if transposed:                          # если транспонированная -> возвращение в обратное состояние
+        matrix[n_to_conv - 1] = n_to_conv_list  # перезапись строчки в матрце
+        if transposed:  # если транспонированная -> возвращение в обратное состояние
             matrix, param = self.matrix_trans(matrix)
-        return matrix                           # возвращение изменённой матрицы
+        return matrix  # возвращение изменённой матрицы
 
-    def simplifying_the_matrix(self, matrix=None):
+    def simplifying_the_matrix(self, matrix=None, simpl_direct=None):
         if matrix is None:
             matrix = self.matrix
-            matrix_t = self.matrix_transposed
-            param = self.matrix_param
-            param_t = self.matrix_param_t
-        else:
-            matrix_t, param_t = self.matrix_trans(matrix)
-            param = self.check_matrix_param(matrix)
-        # сделай поиск единичек
-        # сделай создание нулей через симпл конверсионс
+        coord_ones = []
+        for n in range(len(matrix)):
+            for m in range(len(matrix[n])):
+                if matrix[n][m] == 1:
+                    coord_ones.append([n, m])
+        if coord_ones:
+            for coord in coord_ones:
+                matrix = self.do_some_zeros(coord, matrix, simpl_direct=simpl_direct)
+        return matrix
+
+        # сделай поиск единичек - сделано
+        # сделай создание нулей через симпл конверсионс - сделано
         # сделай переменную стоп крана, если упрощений достаточно
         # а также если не нажать стоп кран - матрица максимально упростится
-        # упрощение нужно для более быстрого поиска детерминанта
-        # больше нулей - меньше считать миноров
+        # упрощение нужно для более быстрого поиска детерминанта - сделано
+        # больше нулей - меньше считать миноров - сделано
+
+    def do_some_zeros(self, coords: list, matrix=None, simpl_direct=None, sec_coord=None):
+        if matrix is None: matrix = self.matrix
+        i_n, i_m = coords[0], coords[1]
+        if sec_coord is None:
+            for nn in range(len(matrix)):
+                for mm in range(len(matrix[0])):
+                    if nn == i_n and mm == i_m:
+                        continue
+                    elif nn == i_n and simpl_direct != 'm':  # убираем всё по n
+                        divider = matrix[nn][mm] * -1
+                        matrix = self.simple_conversions(i_m + 1, mm + 1, divider, True, matrix)
+                    elif mm == i_m and simpl_direct != 'n':  # убираем всё по m
+                        divider = matrix[nn][mm] * -1
+                        matrix = self.simple_conversions(i_n + 1, nn + 1, divider, matrix=matrix)
+        else:
+            for coord in sec_coord:
+                nn = coord[0]
+                mm = coord[1]
+                divider = matrix[nn][mm] // matrix[i_n][i_m] * -1
+                if nn == i_n:
+                    matrix = self.simple_conversions(i_m + 1, mm + 1, divider, True, matrix)
+                if mm == i_m:
+                    matrix = self.simple_conversions(i_n + 1, nn + 1, divider, matrix=matrix)
+
+        return matrix
 
     def get_minor(self, n_minor, m_minor, matrix=None):
-        if matrix is None:              # для матрицы класса
+        if matrix is None:  # для матрицы класса
             matrix = self.matrix.copy()
             param = self.matrix_param
-        else:                           # для заданной матрицы
+        else:  # для заданной матрицы
             param = self.check_matrix_param(matrix)
         minor = []
         n_string = []
-        for n in range(param[0]):       # нахождение минора по n и m
+        for n in range(param[0]):  # нахождение минора по n и m
             if n + 1 != n_minor:
                 for m in range(param[1]):
                     if m + 1 != m_minor:
@@ -214,7 +253,7 @@ class Matrix:
 
     @staticmethod
     def isanum(num: str):
-        try:            # проверка значения на возможность интирования
+        try:  # проверка значения на возможность интирования
             float(num)
             return True
         except ValueError:
@@ -222,35 +261,50 @@ class Matrix:
 
 
 def main():
+    # matttt = Matrix('big_lol', [
+    #     [53, 42, 76, 23, 76],
+    #     [79, 1 , 34, 91, 64],
+    #     [27, 23, 73, 29, 23],
+    #     [23, 74, 23, 93, 65],
+    #     [15, 62, 87, 55, 40]])
+    # matttt.print_m(2, matttt.simplifying_the_matrix(simpl_direct='n'))
+
     # mat = Matrix('test')
-    matttt = Matrix('big_lol', [
-        [53, 42, 76, 23, 76],
-        [79, 93, 34, 91, 64],
-        [27, 23, 73, 29, 23],
-        [23, 74, 23, 93, 65],
-        [15, 62, 87, 55, 40]])
-    matttt.print_m()
-    print(f'det = {matttt.determinant}\n')
-    matttt.print_m(2, matttt.simple_conversions(5, 3, -1, True))
-    mat = Matrix('lol', [
-        [0, 3, 4],
-        [1, 0, 5],
-        [1, 0, 7]])
-    matt = Matrix('lol2', [
-        [1, 5],
-        [7, 3]])
-    mattt = Matrix('lol3', [[10]])
-    mat.print_m()
-    print(f'det = {mat.determinant}\n')
-    matt.print_m()
-    print(f'det = {matt.determinant}\n')
-    mattt.print_m()
-    print(f'det = {mattt.determinant}\n')
-    matttt.simplifying_the_matrix([[1,2],[5,3]])
+
+    # matttt = Matrix('big_lol', [
+    #     [53, 42, 76, 23, 76],
+    #     [79, 93, 34, 91, 64],
+    #     [27, 23, 73, 29, 23],
+    #     [23, 74, 23, 93, 65],
+    #     [15, 62, 87, 55, 40]])
+    # matttt.print_m()
+    # print(f'det = {matttt.determinant}\n')
+    # matttt.print_m(2, matttt.simple_conversions(5, 3, -1, True))
+    # mat = Matrix('lol', [
+    #     [0, 3, 4],
+    #     [1, 0, 5],
+    #     [1, 0, 7]])
+    # matt = Matrix('lol2', [
+    #     [1, 5],
+    #     [7, 3]])
+    # mattt = Matrix('lol3', [[10]])
+    # mat.print_m()
+    # print(f'det = {mat.determinant}\n')
+    # matt.print_m()
+    # print(f'det = {matt.determinant}\n')
+    # mattt.print_m()
+    # print(f'det = {mattt.determinant}\n')
+    # matttt.simplifying_the_matrix([[1,2],[5,3]])
 
     # manual_enter = Matrix('Manual')
     # manual_enter.print_m()
     # print(f'det = {mattt.determinant}\n')
+
+    v_4 = Matrix('v4', [[-14, -5, 6], [0, -12, 15], [3, 1, 5]])
+    v_4.print_m()
+    v_4.print_m(2, v_4.simplifying_the_matrix(simpl_direct='n'))
+    v_4.print_m(2, v_4.do_some_zeros([2, 2], sec_coord=[[1, 2]]))
+    print(v_4.determinant)
 
 
 main()
